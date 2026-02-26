@@ -18,7 +18,7 @@ description: >-
   give me the IPFS link, share this file, get download link, open this CID,
   upload pic, upload document, store image, save photo to IPFS,
   how much space is there, check storacha, storacha status
-version: 1.2.0
+version: 1.3.0
 homepage: https://github.com/adielliot37/storacha-skill
 metadata:
   clawdbot:
@@ -53,7 +53,7 @@ Users will send casual, natural language messages. Match their intent to the cor
 |---|---|
 | "upload this image/photo/file", "save this to IPFS", "put this on storacha", "store this pic" | **Upload** — save the attached/referenced file, then upload with `storacha up` |
 | "how much space do I have", "storage left?", "am I running out of space", "check my usage" | **Usage** — run `storacha usage report` and show human-readable stats |
-| "create a space", "make a new space", "new storage space" | **Create Space** — ask for a name (or suggest one), run `storacha space create` |
+| "create a space", "make a new space", "new storage space" | **Create Space** — ask for a name (or suggest one), run `storacha space create "Name" --no-recovery` |
 | "login to storacha", "set up storacha", "connect my storacha", "authenticate" | **Login** — start the authentication flow (Step 2a) |
 | "show my uploads", "what have I uploaded", "list my files", "my IPFS files" | **List** — run `storacha ls` and present results |
 | "delete this", "remove this upload", "remove CID" | **Remove** — run `storacha rm CID` with appropriate warnings |
@@ -197,7 +197,7 @@ The `*` marks the active space.
 - **If spaces exist with `*` marker** → active space is set. Proceed to Step 4.
 - **If no spaces exist** → automatically create one:
   ```bash
-  storacha space create "MyFiles"
+  storacha space create "MyFiles" --no-recovery
   ```
   Then tell the user:
   > "I've created a storage space called 'MyFiles' for you. This is where your uploads will be stored."
@@ -350,9 +350,9 @@ curl -o output.txt "https://CID.ipfs.storacha.link"
 
 **Create a space:**
 ```bash
-storacha space create "ProjectName"
+storacha space create "ProjectName" --no-recovery
 ```
-Space names are permanent and cannot be changed after creation.
+**IMPORTANT:** Always use `--no-recovery` flag. Without it, the CLI prompts interactively for a recovery key which will hang in non-interactive environments. Space names are permanent and cannot be changed after creation.
 
 **List all spaces:**
 ```bash
@@ -403,7 +403,7 @@ storacha delegation ls
 3. **"Not registered with provider"** → Run `storacha space info` to check providers. Re-register at https://console.storacha.network or create a new space.
 4. **Upload hangs or times out** → Check internet connection. Retry the upload. For large files, ensure stable connectivity.
 5. **"usage/report" permission error** → This is informational only. Uploads should still work. Proceed with the operation.
-6. **"no spaces" or empty space list** → Create a space: `storacha space create "MyFiles"`
+6. **"no spaces" or empty space list** → Create a space: `storacha space create "MyFiles" --no-recovery`
 7. **Storage limit errors** → Upgrade plan at https://console.storacha.network or remove old uploads: `storacha rm CID --shards`
 
 ---
@@ -415,7 +415,7 @@ storacha delegation ls
 | Install CLI | `npm install -g @storacha/cli` |
 | Login | `storacha login user@email.com` |
 | Check identity | `storacha whoami` |
-| Create space | `storacha space create "Name"` |
+| Create space | `storacha space create "Name" --no-recovery` (always use --no-recovery) |
 | List spaces | `storacha space ls` |
 | Switch space | `storacha space use "Name"` |
 | Space details | `storacha space info` |
