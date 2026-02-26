@@ -18,7 +18,7 @@ description: >-
   give me the IPFS link, share this file, get download link, open this CID,
   upload pic, upload document, store image, save photo to IPFS,
   how much space is there, check storacha, storacha status
-version: 1.1.0
+version: 1.2.0
 homepage: https://github.com/adielliot37/storacha-skill
 metadata:
   clawdbot:
@@ -36,6 +36,8 @@ metadata:
 # Storacha Upload
 
 Upload, manage, and retrieve files on IPFS via Storacha decentralized storage.
+
+> **AGENT EXECUTION NOTE:** All `storacha` CLI commands in this skill are non-interactive when arguments are provided. You MUST execute them directly — never tell the user to "run this command manually" or say "I can't run this". The only user interaction needed is: (1) asking for their email for login, and (2) telling them to click the verification email link. Everything else you handle silently.
 
 > **PUBLIC DATA WARNING:** All files uploaded to Storacha/IPFS are publicly accessible. Anyone with the CID can retrieve them. Never upload unencrypted sensitive data.
 
@@ -122,27 +124,35 @@ storacha whoami
 
 ### Step 2a — Login Flow
 
-This is an interactive, multi-step conversation with the user. The user may be chatting from Telegram, WhatsApp, Discord, or any other platform. Guide them through each step and wait for their response before moving on.
+This is a conversation with the user. The user may be chatting from Telegram, WhatsApp, Discord, or any other platform. Guide them through each step and wait for their response before moving on.
 
 **Step A — Ask for email:**
 
-Send the user a message like:
+If the user hasn't provided their email yet, ask:
 > "To use Storacha, I need to log you in. What's your email address? If you don't have a Storacha account yet, you can sign up for free at https://console.storacha.network and then give me your email."
 
-**DO NOT proceed until the user replies with their email address.**
+If the user already provided their email (e.g. "login to storacha, my email is user@example.com"), skip asking and go straight to Step B.
+
+**DO NOT proceed until you have the user's email address.**
 
 **Step B — Run login:**
 
-Once the user provides their email (e.g. `user@example.com`), run:
+**IMPORTANT: The `storacha login` command is NOT interactive when you pass the email as an argument. You MUST run it directly. Do NOT tell the user to run it manually. Do NOT say you can't run it. YOU run it.**
 
 ```bash
 storacha login user@example.com
 ```
 
-This command will block and wait for email verification. While it's waiting, immediately message the user:
-> "I've sent a verification link to user@example.com. Please check your inbox (and spam folder), click the link, and let me know once you've done it."
+Replace `user@example.com` with the actual email the user gave you. This command:
+- Takes the email as a command-line argument (no prompts, no interactive input needed)
+- Sends a verification email automatically
+- Blocks (waits) until the user clicks the link in their email
+- Returns `Agent was authorized by did:mailto:...` on success
 
-**DO NOT run any other commands while waiting.** The CLI will automatically detect when the user clicks the link and return a success message containing `Agent was authorized`.
+Right after running the command, message the user:
+> "I've started the login process. A verification link has been sent to user@example.com. Please check your inbox (and spam folder) and click the link. I'm waiting for confirmation."
+
+**DO NOT run any other commands while waiting.** The CLI will automatically detect when the user clicks the link.
 
 **Step C — Handle new accounts:**
 
