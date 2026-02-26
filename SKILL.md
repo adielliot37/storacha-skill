@@ -7,8 +7,18 @@ description: >-
   decentralized storage, web3 storage, pin to IPFS, content-addressed storage,
   store on chain, get my CID, backup to IPFS, share IPFS link, upload directory,
   remove upload, Storacha delegation, IPFS file sharing, permanent storage,
-  Filecoin backup, manage Storacha account
-version: 1.0.0
+  Filecoin backup, manage Storacha account, upload this image, upload this photo,
+  upload this file to storacha, save this to IPFS, put this on IPFS,
+  how much space do I have, how much storage left, check my storage,
+  what's my storage usage, am I running out of space, storage remaining,
+  create a new space, make a space, set up storacha, setup storacha,
+  login to storacha, sign in to storacha, connect storacha, authenticate storacha,
+  show my uploads, what have I uploaded, list my files, my IPFS files,
+  delete this upload, remove this file from storacha, get me the link,
+  give me the IPFS link, share this file, get download link, open this CID,
+  upload pic, upload document, store image, save photo to IPFS,
+  how much space is there, check storacha, storacha status
+version: 1.1.0
 homepage: https://github.com/adielliot37/storacha-skill
 metadata:
   clawdbot:
@@ -30,6 +40,32 @@ Upload, manage, and retrieve files on IPFS via Storacha decentralized storage.
 > **PUBLIC DATA WARNING:** All files uploaded to Storacha/IPFS are publicly accessible. Anyone with the CID can retrieve them. Never upload unencrypted sensitive data.
 
 > **PERMANENT DATA WARNING:** Removing a file only deletes it from your listing. Other IPFS nodes may retain copies indefinitely. Treat every upload as permanent.
+
+---
+
+## Understanding User Intent
+
+Users will send casual, natural language messages. Match their intent to the correct action:
+
+| User says something like... | Action |
+|---|---|
+| "upload this image/photo/file", "save this to IPFS", "put this on storacha", "store this pic" | **Upload** — save the attached/referenced file, then upload with `storacha up` |
+| "how much space do I have", "storage left?", "am I running out of space", "check my usage" | **Usage** — run `storacha usage report` and show human-readable stats |
+| "create a space", "make a new space", "new storage space" | **Create Space** — ask for a name (or suggest one), run `storacha space create` |
+| "login to storacha", "set up storacha", "connect my storacha", "authenticate" | **Login** — start the authentication flow (Step 2a) |
+| "show my uploads", "what have I uploaded", "list my files", "my IPFS files" | **List** — run `storacha ls` and present results |
+| "delete this", "remove this upload", "remove CID" | **Remove** — run `storacha rm CID` with appropriate warnings |
+| "get me the link", "share this file", "IPFS link for this", "download link" | **Retrieve** — construct and share both gateway URLs |
+| "switch space", "use my other space", "change space" | **Switch Space** — run `storacha space ls`, then `storacha space use` |
+| "check storacha", "storacha status", "is storacha working" | **Health Check** — run full diagnostic (Steps 1-5) |
+
+**Rules for handling user messages:**
+
+1. **Always check authentication first.** Before any operation, silently run `storacha whoami`. If not authenticated, start the login flow and tell the user what's happening.
+2. **Handle file attachments.** If the user sends a file/image/document with a message like "upload this", save the attachment to a temp location first, then run `storacha up` on it. After upload, share the gateway URL back.
+3. **Be proactive with results.** After uploading, always share the gateway link. After checking usage, always convert bytes to human-readable. After listing uploads, format them neatly.
+4. **Don't dump raw CLI output.** Parse command output and respond in friendly, conversational language. The user doesn't want to see raw terminal text.
+5. **Auto-recover from errors.** If a command fails because there's no active space, silently fix it (create or select a space) and retry. Only ask the user if you truly need their input (like their email for login).
 
 ---
 
@@ -222,24 +258,29 @@ If the usage report returns a permission error, inform the user but note that up
 
 ### Upload a File
 
+When a user asks to upload something (file, image, photo, document, video, etc.):
+
+1. **If the user attached a file** — save it to a temp location (e.g. `/tmp/upload/filename.ext`)
+2. **If the user referenced a file path** — use that path directly
+3. **Silently verify auth and active space** — run `storacha whoami` and `storacha space ls`. Fix any issues without bothering the user.
+4. **Upload:**
+
 ```bash
 storacha up /path/to/file
 ```
 
-**Expected output:**
-```
-⁂ Stored 1 file
-⁂ https://storacha.link/ipfs/bafy...
-```
+5. **Parse the output** and respond conversationally:
 
-After a successful upload, present:
-- **Filename:** the uploaded file name
-- **CID:** the content identifier hash
-- **Gateway URLs:**
-  - Path style: `https://storacha.link/ipfs/CID`
-  - Subdomain style: `https://CID.ipfs.storacha.link`
+> "Done! Your file is uploaded to IPFS. Here's your link:
+> https://storacha.link/ipfs/bafy...
+> Anyone with this link can access the file."
 
-Remind the user: anyone with the CID or link can access this file.
+Always provide both gateway URL styles:
+- Path style: `https://storacha.link/ipfs/CID`
+- Subdomain style: `https://CID.ipfs.storacha.link`
+
+If uploading an image/photo, also mention:
+> "You can share this link directly — it works in any browser."
 
 ### Upload a Directory
 
