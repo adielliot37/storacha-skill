@@ -86,25 +86,53 @@ storacha whoami
 
 ### Step 2a — Login Flow
 
-Ask the user for their Storacha email address. If they don't have an account, direct them to sign up (free) at https://console.storacha.network.
+This is an interactive, multi-step conversation with the user. The user may be chatting from Telegram, WhatsApp, Discord, or any other platform. Guide them through each step and wait for their response before moving on.
+
+**Step A — Ask for email:**
+
+Send the user a message like:
+> "To use Storacha, I need to log you in. What's your email address? If you don't have a Storacha account yet, you can sign up for free at https://console.storacha.network and then give me your email."
+
+**DO NOT proceed until the user replies with their email address.**
+
+**Step B — Run login:**
+
+Once the user provides their email (e.g. `user@example.com`), run:
 
 ```bash
-storacha login USER_EMAIL
+storacha login user@example.com
 ```
 
-Replace `USER_EMAIL` with the actual email address provided by the user.
+This command will block and wait for email verification. While it's waiting, immediately message the user:
+> "I've sent a verification link to user@example.com. Please check your inbox (and spam folder), click the link, and let me know once you've done it."
 
-Tell the user: *"Check your email for a verification link from Storacha and click it. Let me know once you've done that."*
+**DO NOT run any other commands while waiting.** The CLI will automatically detect when the user clicks the link and return a success message containing `Agent was authorized`.
 
-**WAIT for user confirmation before proceeding.** The CLI blocks until the email link is clicked.
+**Step C — Handle new accounts:**
 
-If this is a new account, inform the user they may need to select a plan after clicking the link:
+If this is the user's first time, they may need to select a plan after clicking the verification link. Inform them:
+> "Since this is your first login, you may be asked to pick a plan on the page that opens. Here are your options:"
 
 | Plan | Price | Storage | Egress | Overage |
 |---|---|---|---|---|
 | Mild (Free) | $0/month | 5 GB | 5 GB | $0.15/GB |
 | Medium | $10/month | 100 GB | 100 GB | $0.05/GB |
 | Extra Spicy | $100/month | 2 TB | 2 TB | $0.03/GB |
+
+> "The free Mild plan gives you 5 GB which is enough to get started."
+
+**Step D — Confirm success:**
+
+After the CLI returns successfully, verify by running:
+
+```bash
+storacha whoami
+```
+
+If it returns a `did:key:` value, tell the user:
+> "You're all set! Successfully logged in to Storacha."
+
+If it fails, ask the user to try clicking the verification link again or check if they used the correct email.
 
 ### Step 3 — Check Spaces
 
@@ -121,15 +149,22 @@ storacha space ls
 The `*` marks the active space.
 
 - **If spaces exist with `*` marker** → active space is set. Proceed to Step 4.
-- **If no spaces exist** → create one:
+- **If no spaces exist** → automatically create one:
   ```bash
   storacha space create "MyFiles"
   ```
+  Then tell the user:
+  > "I've created a storage space called 'MyFiles' for you. This is where your uploads will be stored."
+
   Space names are permanent and cannot be changed.
-- **If spaces exist but none is active** → activate one:
+- **If spaces exist but none is active** → pick the first one and activate it:
   ```bash
   storacha space use "SpaceName"
   ```
+  Then tell the user:
+  > "I've set 'SpaceName' as your active storage space."
+
+Handle all of this silently without asking the user to run commands. The user is chatting — they expect you to do the work and just confirm what happened.
 
 ### Step 4 — Verify Provider Registration
 
