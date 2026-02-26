@@ -9,7 +9,7 @@ description: >-
   remove upload, Storacha delegation, IPFS file sharing, permanent storage,
   Filecoin backup, manage Storacha account
 version: 1.0.0
-homepage: https://github.com/openclaw/storacha-upload
+homepage: https://github.com/adielliot37/storacha-skill
 metadata:
   clawdbot:
     emoji: "🔥"
