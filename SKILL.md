@@ -18,7 +18,7 @@ description: >-
   give me the IPFS link, share this file, get download link, open this CID,
   upload pic, upload document, store image, save photo to IPFS,
   how much space is there, check storacha, storacha status
-version: 1.3.0
+version: 1.3.1
 homepage: https://github.com/adielliot37/storacha-skill
 metadata:
   clawdbot:
